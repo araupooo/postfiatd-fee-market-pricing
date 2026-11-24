@@ -1,0 +1,314 @@
+{
+ "excerpts": [
+  {
+   "anchor": "grow exponentially",
+   "end_line": 64,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E01",
+   "start_line": 42
+  },
+  {
+   "anchor": "ledgersInQueue = 20",
+   "end_line": 109,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E02",
+   "start_line": 78
+  },
+  {
+   "anchor": "normalConsensusIncreasePercent = 20",
+   "end_line": 156,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E03",
+   "start_line": 130
+  },
+  {
+   "anchor": "minimumTxnCount_(",
+   "end_line": 430,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E04",
+   "start_line": 378
+  },
+  {
+   "anchor": "feeLevel > rhs.feeLevel",
+   "end_line": 663,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E05",
+   "start_line": 631
+  },
+  {
+   "anchor": "retryPenalty = false",
+   "end_line": 690,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E06",
+   "start_line": 665
+  },
+  {
+   "anchor": "retriesAllowed = 10",
+   "end_line": 590,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E07",
+   "start_line": 575
+  },
+  {
+   "anchor": "mulDiv(level, baseFee, TxQ::baseLevel)",
+   "end_line": 878,
+   "file": "src/xrpld/app/misc/TxQ.h",
+   "id": "E08",
+   "start_line": 860
+  },
+  {
+   "anchor": "mulDiv(effectiveFeePaid, TxQ::baseLevel, baseFee)",
+   "end_line": 66,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E09",
+   "start_line": 39
+  },
+  {
+   "anchor": "escalationMultiplier_ =",
+   "end_line": 170,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E10",
+   "start_line": 84
+  },
+  {
+   "anchor": "current * current, target * target",
+   "end_line": 195,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E11",
+   "start_line": 173
+  },
+  {
+   "anchor": "1 << 21",
+   "end_line": 232,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E12",
+   "start_line": 197
+  },
+  {
+   "anchor": "escalatedSeriesFeeLevel",
+   "end_line": 275,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E13",
+   "start_line": 234
+  },
+  {
+   "anchor": "isFull() const",
+   "end_line": 383,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E14",
+   "start_line": 376
+  },
+  {
+   "anchor": "telCAN_NOT_QUEUE",
+   "end_line": 462,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E15",
+   "start_line": 384
+  },
+  {
+   "anchor": "eraseAndAdvance",
+   "end_line": 515,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E16",
+   "start_line": 466
+  },
+  {
+   "anchor": "requiredTotalFeeLevel",
+   "end_line": 560,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E17",
+   "start_line": 518
+  },
+  {
+   "anchor": "retriesRemaining",
+   "end_line": 614,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E18",
+   "start_line": 560
+  },
+  {
+   "anchor": "A blocking transaction is one",
+   "end_line": 729,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E19",
+   "start_line": 616
+  },
+  {
+   "anchor": "terPRE_TICKET",
+   "end_line": 790,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E20",
+   "start_line": 730
+  },
+  {
+   "anchor": "requiredRetryLevel",
+   "end_line": 935,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E21",
+   "start_line": 875
+  },
+  {
+   "anchor": "telCAN_NOT_QUEUE_BALANCE",
+   "end_line": 1130,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E22",
+   "start_line": 1040
+  },
+  {
+   "anchor": "telCAN_NOT_QUEUE_FULL",
+   "end_line": 1320,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E23",
+   "start_line": 1243
+  },
+  {
+   "anchor": "maxSize_ = std::max",
+   "end_line": 1425,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E24",
+   "start_line": 1366
+  },
+  {
+   "anchor": "retriesRemaining <= 0",
+   "end_line": 1560,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E25",
+   "start_line": 1435
+  },
+  {
+   "anchor": "parentHashComp = parentHash",
+   "end_line": 1620,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E26",
+   "start_line": 1570
+  },
+  {
+   "anchor": "feeLevelPaid >= requiredFeeLevel",
+   "end_line": 1744,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E27",
+   "start_line": 1669
+  },
+  {
+   "anchor": "minProcessingFeeLevel",
+   "end_line": 1799,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E28",
+   "start_line": 1778
+  },
+  {
+   "anchor": "getTxRequiredFeeAndSeq",
+   "end_line": 1825,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E29",
+   "start_line": 1800
+  },
+  {
+   "anchor": "open_ledger_level",
+   "end_line": 1910,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E30",
+   "start_line": 1860
+  },
+  {
+   "anchor": "setup_TxQ",
+   "end_line": 1982,
+   "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+   "id": "E31",
+   "start_line": 1915
+  },
+  {
+   "anchor": "getLoadFactor",
+   "end_line": 112,
+   "file": "src/xrpld/app/misc/LoadFeeTrack.h",
+   "id": "E32",
+   "start_line": 95
+  },
+  {
+   "anchor": "lftFeeMax = lftNormalFee * 1000000",
+   "end_line": 148,
+   "file": "src/xrpld/app/misc/LoadFeeTrack.h",
+   "id": "E33",
+   "start_line": 141
+  },
+  {
+   "anchor": "raiseLocalFee",
+   "end_line": 58,
+   "file": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp",
+   "id": "E34",
+   "start_line": 32
+  },
+  {
+   "anchor": "lowerLocalFee",
+   "end_line": 79,
+   "file": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp",
+   "id": "E35",
+   "start_line": 60
+  },
+  {
+   "anchor": "scaleFeeLoad",
+   "end_line": 112,
+   "file": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp",
+   "id": "E36",
+   "start_line": 84
+  },
+  {
+   "anchor": "isOverloaded()",
+   "end_line": 190,
+   "file": "src/xrpld/app/main/LoadManager.cpp",
+   "id": "E37",
+   "start_line": 176
+  },
+  {
+   "anchor": "signerCount * baseFee",
+   "end_line": 347,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E38",
+   "start_line": 331
+  },
+  {
+   "anchor": "minimumFee",
+   "end_line": 378,
+   "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+   "id": "E39",
+   "start_line": 370
+  },
+  {
+   "anchor": "currently 10 drops",
+   "end_line": 68,
+   "file": "src/xrpld/app/misc/FeeEscalation.md",
+   "id": "E40",
+   "start_line": 14
+  },
+  {
+   "anchor": "minimum value of 5",
+   "end_line": 252,
+   "file": "src/xrpld/app/misc/FeeEscalation.md",
+   "id": "E41",
+   "start_line": 226
+  },
+  {
+   "anchor": "up to 10 times",
+   "end_line": 280,
+   "file": "src/xrpld/app/misc/FeeEscalation.md",
+   "id": "E42",
+   "start_line": 253
+  },
+  {
+   "anchor": "open_ledger_level",
+   "end_line": 320,
+   "file": "src/xrpld/app/misc/FeeEscalation.md",
+   "id": "E43",
+   "start_line": 286
+  },
+  {
+   "anchor": "XRPAmount base{0}",
+   "end_line": 38,
+   "file": "include/xrpl/protocol/Fees.h",
+   "id": "E44",
+   "start_line": 32
+  }
+ ],
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "repo": "postfiatd"
+}
