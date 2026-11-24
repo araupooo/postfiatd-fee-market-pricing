@@ -1,0 +1,34 @@
+# Source excerpt E06 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 665-690.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 665-690 ---
+    class TxQAccount
+    {
+    public:
+        using TxMap = std::map<SeqProxy, MaybeTx>;
+
+        /// The account
+        AccountID const account;
+        /// Sequence number will be used as the key.
+        TxMap transactions;
+        /* If this account has had any transaction retry more than
+            `retriesAllowed` times so that it was dropped from the
+            queue, then all other transactions for this account will
+            be given at most 2 attempts before being removed. Helps
+            prevent wasting resources on retries that are more likely
+            to fail.
+        */
+        bool retryPenalty = false;
+        /* If this account has had any transaction fail or expire,
+            then when the queue is nearly full, transactions from
+            this account will be discarded. Helps prevent the queue
+            from getting filled and wedged.
+        */
+        bool dropPenalty = false;
+
+    public:
+        /// Construct from a transaction

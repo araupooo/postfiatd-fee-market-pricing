@@ -1,0 +1,27 @@
+# Source excerpt E08 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 860-878.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 860-878 ---
+
+template <class T>
+XRPAmount
+toDrops(FeeLevel<T> const& level, XRPAmount baseFee)
+{
+    return mulDiv(level, baseFee, TxQ::baseLevel)
+        .value_or(XRPAmount(STAmount::cMaxNativeN));
+}
+
+inline FeeLevel64
+toFeeLevel(XRPAmount const& drops, XRPAmount const& baseFee)
+{
+    return mulDiv(drops, TxQ::baseLevel, baseFee)
+        .value_or(FeeLevel64(std::numeric_limits<std::uint64_t>::max()));
+}
+
+}  // namespace ripple
+
+#endif

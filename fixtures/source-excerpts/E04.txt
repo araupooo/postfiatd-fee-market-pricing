@@ -1,0 +1,61 @@
+# Source excerpt E04 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 378-430.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 378-430 ---
+    {
+    private:
+        /// Minimum value of txnsExpected.
+        std::size_t const minimumTxnCount_;
+        /// Number of transactions per ledger that fee escalation "works
+        /// towards".
+        std::size_t const targetTxnCount_;
+        /// Maximum value of txnsExpected
+        std::optional<std::size_t> const maximumTxnCount_;
+        /// Number of transactions expected per ledger.
+        /// One more than this value will be accepted
+        /// before escalation kicks in.
+        std::size_t txnsExpected_;
+        /// Recent history of transaction counts that
+        /// exceed the targetTxnCount_
+        boost::circular_buffer<std::size_t> recentTxnCounts_;
+        /// Based on the median fee of the LCL. Used
+        /// when fee escalation kicks in.
+        FeeLevel64 escalationMultiplier_;
+        /// Journal
+        beast::Journal const j_;
+
+    public:
+        /// Constructor
+        FeeMetrics(Setup const& setup, beast::Journal j)
+            : minimumTxnCount_(
+                  setup.standAlone ? setup.minimumTxnInLedgerSA
+                                   : setup.minimumTxnInLedger)
+            , targetTxnCount_(
+                  setup.targetTxnInLedger < minimumTxnCount_
+                      ? minimumTxnCount_
+                      : setup.targetTxnInLedger)
+            , maximumTxnCount_(
+                  setup.maximumTxnInLedger
+                      ? *setup.maximumTxnInLedger < targetTxnCount_
+                          ? targetTxnCount_
+                          : *setup.maximumTxnInLedger
+                      : std::optional<std::size_t>(std::nullopt))
+            , txnsExpected_(minimumTxnCount_)
+            , recentTxnCounts_(setup.ledgersInQueue)
+            , escalationMultiplier_(setup.minimumEscalationMultiplier)
+            , j_(j)
+        {
+        }
+
+        /**
+            Updates fee metrics based on the transactions in the ReadView
+            for use in fee escalation calculations.
+
+            @param app Rippled Application object.
+            @param view View of the LCL that was just closed or received.
+            @param timeLeap Indicates that rippled is under load so fees
+            should grow faster.

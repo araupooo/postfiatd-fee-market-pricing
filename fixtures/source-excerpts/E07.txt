@@ -1,0 +1,24 @@
+# Source excerpt E07 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/TxQ.h, lines 575-590.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: e764bd3e2a63b404397dc2bc66642f283605e69290915a2f24e62c615a0d4fed
+# Source file git blob SHA: 6afd83b0d0885f25cdac7de475e9dd1ebc167ed3
+# Source file size: 32999 bytes
+
+# --- src/xrpld/app/misc/TxQ.h lines 575-590 ---
+            essentially arbitrary. It should be large enough to
+            allow temporary failures to clear up, but small enough
+            that the queue doesn't fill up with stale transactions
+            which prevent lower fee level transactions from queuing.
+        */
+        static constexpr int retriesAllowed = 10;
+
+        /** The hash of the parent ledger.
+
+           This is used to pseudo-randomize the transaction order when
+           populating byFee_, by XORing it with the transaction hash (txID).
+           Using a single static and doing the XOR operation every time was
+           tested to be as fast or faster than storing the computed "sort key",
+           and obviously uses less memory.
+         */
+        static LedgerHash parentHashComp;
