@@ -1,0 +1,10 @@
+# run.log — deterministic output digests (no timestamps, no absolute paths)
+# step extract_excerpts: pass
+# step fee_market_model_config: pass
+# step simulator: pass
+# step probe: pass
+09850198fa6f62d008e04d8900812aad157ce051e36cd1cec3045319ebc8249d  outputs/derived/fee-market-results.json
+954c04abb7c49e6480606ea92be7e1994f91b3feb0d0d2ae37ca5f61ba01c147  outputs/derived/probe-results.json
+b383438a3d160bb2228558196ccf8e57468651782e92ec73697366bbe737ec68  outputs/derived/run-summary.json
+4bf26daafcc637909e3bf414fe8c7c672861824bbb0d29073b0e21e551a1d6ba  outputs/derived/scenario-matrix.json
+7cd06defc85d07778cf0b6b0921947af9077435e9538e6a83a64ebdeb7536e88  outputs/probe-run.log
