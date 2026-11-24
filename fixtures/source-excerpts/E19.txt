@@ -1,0 +1,122 @@
+# Source excerpt E19 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 616-729.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 616-729 ---
+// Overview of considerations for when a transaction is accepted into the TxQ:
+//
+// These rules apply to the transactions in the queue owned by a single
+// account.  Briefly, the primary considerations are:
+//
+// 1. Is the new transaction blocking?
+// 2. Is there an expiration gap in the account's sequence-based transactions?
+// 3. Does the new transaction replace one that is already in the TxQ?
+// 4. Is the transaction's sequence or ticket value acceptable for this account?
+// 5. Is the transaction likely to claim a fee?
+// 6. Is the queue full?
+//
+// Here are more details.
+//
+// 1. A blocking transaction is one that would change the validity of following
+//    transactions for the issuing account.  Examples of blocking transactions
+//    include SetRegularKey and SignerListSet.
+//
+//    A blocking transaction can only be added to the queue for an account if:
+//
+//    a. The queue for that account is empty, or
+//
+//    b. The blocking transaction replaces the only transaction in the
+//       account's queue.
+//
+//    While a blocker is in the account's queue no additional transactions
+//    can be added to the queue.
+//
+//    As a consequence, any blocker is always alone in the account's queue.
+//
+// 2. Transactions are given unique identifiers using either Sequence numbers
+//    or Tickets.  In general, sequence numbers in the queue are expected to
+//    start with the account root sequence and increment from there.  There
+//    are two exceptions:
+//
+//    a. Sequence holes left by ticket creation.  If a transaction creates
+//       more than one ticket, then the account sequence number will jump
+//       by the number of tickets created.  These holes are fine.
+//
+//    b. Sequence gaps left by transaction expiration.  If transactions stay
+//       in the queue long enough they may expire.  If that happens it leaves
+//       gaps in the sequence numbers held by the queue.  These gaps are
+//       important because, if left in place, they will block any later
+//       sequence-based transactions in the queue from working.  Remember,
+//       for any given account sequence numbers must be used consecutively
+//       (with the exception of ticket-induced holes).
+//
+// 3. Transactions in the queue may be replaced.  If a transaction in the
+//    queue has the same SeqProxy as the incoming transaction, then the
+//    transaction in the queue will be replaced if the following conditions
+//    are met:
+//
+//    a. The replacement must provide a fee that is at least 1.25 times the
+//       fee of the transaction it is replacing.
+//
+//    b. If the transaction being replaced has a sequence number, then
+//       the transaction may not be after any expiration-based sequence
+//       gaps in the account's queue.
+//
+//    c. A replacement that is a blocker is only allowed if the transaction
+//       it replaces is the only transaction in the account's queue.
+//
+// 4. The transaction that is not a replacement must have an acceptable
+//    sequence or ticket ID:
+//
+//    Sequence: For a given account's queue configuration there is at most
+//    one sequence number that is acceptable to the queue for that account.
+//    The rules are:
+//
+//    a. If there are no sequence-based transactions in the queue and the
+//       candidate transaction has a sequence number, that value must match
+//       the account root's sequence.
+//
+//    b. If there are sequence-based transactions in the queue for that
+//       account and there are no expiration-based gaps, then the candidate's
+//       sequence number must belong at the end of the list of sequences.
+//
+//    c. If there are expiration-based gaps in the sequence-based
+//       transactions in the account's queue, then the candidate's sequence
+//       value must go precisely at the front of the first gap.
+//
+//    Ticket: If there are no blockers or sequence gaps in the account's
+//    queue, then there are many tickets that are acceptable to the queue
+//    for that account.  The rules are:
+//
+//    a. If there are no blockers in the account's queue and the ticket
+//       required by the transaction is in the ledger then the transaction
+//       may be added to the account's queue.
+//
+//    b. If there is a ticket-based blocker in the account's queue then
+//       that blocker can be replaced.
+//
+//    Note that it is not sufficient for the transaction that would create
+//    the necessary ticket to be in the account's queue.  The required ticket
+//    must already be in the ledger.  This avoids problems that can occur if
+//    a ticket-creating transaction enters the queue but expires out of the
+//    queue before its tickets are created.
+//
+// 5. The transaction must be likely to claim a fee.  In general that is
+//    checked by having preclaim return a tes or tec code.
+//
+//    Extra work is done here to account for funds that other transactions
+//    in the queue remove from the account.
+//
+// 6. The queue must not be full.
+//
+//    a. Each account can queue up to a maximum of 10 transactions.  Beyond
+//       that transactions are rejected.  There is an exception for this case
+//       when filling expiration-based sequence gaps.
+//
+//    b. The entire queue also has a (dynamic) maximum size.  Transactions
+//       beyond that limit are rejected.
+//
+ApplyResult

@@ -1,0 +1,69 @@
+# Source excerpt E20 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 730-790.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 730-790 ---
+TxQ::apply(
+    Application& app,
+    OpenView& view,
+    std::shared_ptr<STTx const> const& tx,
+    ApplyFlags flags,
+    beast::Journal j)
+{
+    STAmountSO stAmountSO{view.rules().enabled(fixSTAmountCanonicalize)};
+    NumberSO stNumberSO{view.rules().enabled(fixUniversalNumber)};
+
+    // See if the transaction is valid, properly formed,
+    // etc. before doing potentially expensive queue
+    // replace and multi-transaction operations.
+    auto const pfresult = preflight(app, view.rules(), *tx, flags, j);
+    if (pfresult.ter != tesSUCCESS)
+        return {pfresult.ter, false};
+
+    // See if the transaction paid a high enough fee that it can go straight
+    // into the ledger.
+    if (auto directApplied = tryDirectApply(app, view, tx, flags, j))
+        return *directApplied;
+
+    // If we get past tryDirectApply() without returning then we expect
+    // one of the following to occur:
+    //
+    //  o We will decide the transaction is unlikely to claim a fee.
+    //  o The transaction paid a high enough fee that fee averaging will apply.
+    //  o The transaction will be queued.
+
+    // If the account is not currently in the ledger, don't queue its tx.
+    auto const account = (*tx)[sfAccount];
+    Keylet const accountKey{keylet::account(account)};
+    auto const sleAccount = view.read(accountKey);
+    if (!sleAccount)
+        return {terNO_ACCOUNT, false};
+
+    // If the transaction needs a Ticket is that Ticket in the ledger?
+    SeqProxy const acctSeqProx = SeqProxy::sequence((*sleAccount)[sfSequence]);
+    SeqProxy const txSeqProx = tx->getSeqProxy();
+    if (txSeqProx.isTicket() &&
+        !view.exists(keylet::ticket(account, txSeqProx)))
+    {
+        if (txSeqProx.value() < acctSeqProx.value())
+            // The ticket number is low enough that it should already be
+            // in the ledger if it were ever going to exist.
+            return {tefNO_TICKET, false};
+
+        // We don't queue transactions that use Tickets unless
+        // we can find the Ticket in the ledger.
+        return {terPRE_TICKET, false};
+    }
+
+    std::lock_guard lock(mutex_);
+
+    // accountIter is not const because it may be updated further down.
+    AccountMap::iterator accountIter = byAccount_.find(account);
+    bool const accountIsInQueue = accountIter != byAccount_.end();
+
+    // _If_ the account is in the queue, then ignore any sequence-based
+    // queued transactions that slipped into the ledger while we were not
+    // watching.  This does actually happen in the wild, but it's uncommon.

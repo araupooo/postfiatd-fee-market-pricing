@@ -1,0 +1,44 @@
+# Source excerpt E12 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 197-232.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 197-232 ---
+sumOfFirstSquares(std::size_t xIn)
+{
+    // sum(n = 1->x) : n * n = x(x + 1)(2x + 1) / 6
+
+    // We expect that size_t == std::uint64_t but, just in case, guarantee
+    // we lose no bits.
+    std::uint64_t x{xIn};
+
+    // If x is anywhere on the order of 2^^21, it's going
+    // to completely dominate the computation and is likely
+    // enough to overflow that we're just going to assume
+    // it does. If we have anywhere near 2^^21 transactions
+    // in a ledger, this is the least of our problems.
+    if (x >= (1 << 21))
+        return {false, std::numeric_limits<std::uint64_t>::max()};
+    return {true, (x * (x + 1) * (2 * x + 1)) / 6};
+}
+
+// Unit tests for sumOfSquares()
+static_assert(sumOfFirstSquares(1).first == true);
+static_assert(sumOfFirstSquares(1).second == 1);
+
+static_assert(sumOfFirstSquares(2).first == true);
+static_assert(sumOfFirstSquares(2).second == 5);
+
+static_assert(sumOfFirstSquares(0x1FFFFF).first == true, "");
+static_assert(sumOfFirstSquares(0x1FFFFF).second == 0x2AAAA8AAAAB00000ul, "");
+
+static_assert(sumOfFirstSquares(0x200000).first == false, "");
+static_assert(
+    sumOfFirstSquares(0x200000).second ==
+        std::numeric_limits<std::uint64_t>::max(),
+    "");
+
+}  // namespace detail
+

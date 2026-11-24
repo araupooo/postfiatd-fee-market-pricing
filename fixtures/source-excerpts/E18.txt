@@ -1,0 +1,63 @@
+# Source excerpt E18 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 560-614.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 560-614 ---
+
+    // This transaction paid enough to clear out the queue.
+    // Attempt to apply the queued transactions.
+    for (auto it = beginTxIter; it != endTxIter; ++it)
+    {
+        auto txResult = it->second.apply(app, view, j);
+        // Succeed or fail, use up a retry, because if the overall
+        // process fails, we want the attempt to count. If it all
+        // succeeds, the MaybeTx will be destructed, so it'll be
+        // moot.
+        --it->second.retriesRemaining;
+        it->second.lastResult = txResult.ter;
+
+        // In TxQ::apply we note that it's possible for a transaction with
+        // a ticket to both be in the queue and in the ledger.  And, while
+        // we're in TxQ::apply, it's too expensive to filter those out.
+        //
+        // So here in tryClearAccountQueueUpThruTx we just received a batch of
+        // queued transactions.  And occasionally one of those is a ticketed
+        // transaction that is both in the queue and in the ledger.  When
+        // that happens the queued transaction returns tefNO_TICKET.
+        //
+        // The transaction that returned tefNO_TICKET can never succeed
+        // and we'd like to get it out of the queue as soon as possible.
+        // The easiest way to do that from here is to treat the transaction
+        // as though it succeeded and attempt to clear the remaining
+        // transactions in the account queue.  Then, if clearing the account
+        // is successful, we will have removed any ticketed transactions
+        // that can never succeed.
+        if (txResult.ter == tefNO_TICKET)
+            continue;
+
+        if (!txResult.applied)
+        {
+            // Transaction failed to apply. Fall back to the normal process.
+            return {txResult.ter, false};
+        }
+    }
+    // Apply the current tx. Because the state of the view has been changed
+    // by the queued txs, we also need to preclaim again.
+    auto const txResult = doApply(preclaim(pfresult, app, view), app, view);
+
+    if (txResult.applied)
+    {
+        // All of the queued transactions applied, so remove them from the
+        // queue.
+        endTxIter = erase(accountIter->second, beginTxIter, endTxIter);
+        // If `tx` is replacing a queued tx, delete that one, too.
+        if (endTxIter != accountIter->second.transactions.end() &&
+            endTxIter->first == tSeqProx)
+            erase(accountIter->second, endTxIter, std::next(endTxIter));
+    }
+
+    return txResult;
+}

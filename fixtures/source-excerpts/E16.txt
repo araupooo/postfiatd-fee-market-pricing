@@ -1,0 +1,58 @@
+# Source excerpt E16 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 466-515.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 466-515 ---
+TxQ::eraseAndAdvance(TxQ::FeeMultiSet::const_iterator_type candidateIter)
+    -> FeeMultiSet::iterator_type
+{
+    auto& txQAccount = byAccount_.at(candidateIter->account);
+    auto const accountIter =
+        txQAccount.transactions.find(candidateIter->seqProxy);
+    XRPL_ASSERT(
+        accountIter != txQAccount.transactions.end(),
+        "ripple::TxQ::eraseAndAdvance : account found");
+
+    // Note that sequence-based transactions must be applied in sequence order
+    // from smallest to largest.  But ticket-based transactions can be
+    // applied in any order.
+    XRPL_ASSERT(
+        candidateIter->seqProxy.isTicket() ||
+            accountIter == txQAccount.transactions.begin(),
+        "ripple::TxQ::eraseAndAdvance : ticket or sequence");
+    XRPL_ASSERT(
+        byFee_.iterator_to(accountIter->second) == candidateIter,
+        "ripple::TxQ::eraseAndAdvance : found in byFee");
+    auto const accountNextIter = std::next(accountIter);
+
+    // Check if the next transaction for this account is earlier in the queue,
+    // which means we skipped it earlier, and need to try it again.
+    auto const feeNextIter = std::next(candidateIter);
+    bool const useAccountNext =
+        accountNextIter != txQAccount.transactions.end() &&
+        accountNextIter->first > candidateIter->seqProxy &&
+        (feeNextIter == byFee_.end() ||
+         byFee_.value_comp()(accountNextIter->second, *feeNextIter));
+
+    auto const candidateNextIter = byFee_.erase(candidateIter);
+    txQAccount.transactions.erase(accountIter);
+
+    return useAccountNext ? byFee_.iterator_to(accountNextIter->second)
+                          : candidateNextIter;
+}
+
+auto
+TxQ::erase(
+    TxQ::TxQAccount& txQAccount,
+    TxQ::TxQAccount::TxMap::const_iterator begin,
+    TxQ::TxQAccount::TxMap::const_iterator end) -> TxQAccount::TxMap::iterator
+{
+    for (auto it = begin; it != end; ++it)
+    {
+        byFee_.erase(byFee_.iterator_to(it->second));
+    }
+    return txQAccount.transactions.erase(begin, end);
+}
