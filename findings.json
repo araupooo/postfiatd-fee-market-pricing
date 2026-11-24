@@ -1,0 +1,90 @@
+{
+ "findings": [
+  {
+   "evidence": "R-08 (scaleFeeLevel, TxQ.cpp:173-195) + R-09 (the documentation says 'increases exponentially', FeeEscalation.md:57, E40): the code computes multiplier * current^2 / target^2. Threshold table: open count 512 against target 256 needs level 512,000.",
+   "id": "F-01",
+   "severity": "HIGH",
+   "status": "VERIFIED",
+   "title": "Escalation is quadratic, not exponential: at twice the target the required fee level is four times the median, at four times the target sixteen times"
+  },
+  {
+   "evidence": "R-06 (median floored at the minimum, TxQ.cpp:84-170) + R-07 (minimum is baseLevel * 500 = 128,000, TxQ.h:100) + scenario S-13 + threshold table row (32, 128000, 33).",
+   "id": "F-02",
+   "severity": "HIGH",
+   "status": "VERIFIED",
+   "title": "The 128,000 median floor makes the first escalated fee enormous: a cold-start ledger's 33rd transaction needs fee level 136,125, about 5,317 drops at a 10-drop base"
+  },
+  {
+   "evidence": "R-33 (TxQ.cpp:1243-1320) + scenario S-03 run A: a 256-level transaction is rejected while the queue is full; run B: a 512-level transaction is admitted and the cheapest of the lowest-fee account is dropped.",
+   "id": "F-03",
+   "severity": "HIGH",
+   "status": "VERIFIED",
+   "title": "Queue-full eviction judges a newcomer against the victim account's average fee level, so one high-fee transaction sharing an account with cheap ones can be displaced by a mid-fee newcomer"
+  },
+  {
+   "evidence": "R-30 (accept skips non-first sequence transactions, TxQ.cpp:1435-1560) + scenario S-05 run A (fee level 100,000 stalled behind its sequence predecessor) and run B (series rescue clears the queue at 1,000,768 vs 903,750 required).",
+   "id": "F-04",
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "Priority inversion: sequence order beats fee order, so a high-fee transaction behind a low-fee predecessor stalls until the predecessor clears or is rescued"
+  },
+  {
+   "evidence": "E41 (FeeEscalation.md:226-228) vs R-12 (TxQ.h:78-109). The document's growth/shrink description also predates the code's grow-fast/shrink-slow rule (R-11). Operators reading only the document will misprice.",
+   "id": "F-05",
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "FeeEscalation.md is stale on the ledger-size bounds: it says minimum 5 and target 50, the code says minimum 32 and target 256"
+  },
+  {
+   "evidence": "R-15 (raiseLocalFee, LoadFeeTrack.cpp:32-58) + R-17 (load factor is the max of local, remote, cluster) + R-18 (privileged cap, LoadFeeTrack.cpp:84-112) + scenarios S-09 (priced at 3x) and S-10 (queued at 5x).",
+   "id": "F-06",
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "The load fee is local-only and needs two consecutive overload signals; privileged submitters pay the remote factor while local load stays below four times remote"
+  },
+  {
+   "evidence": "R-23 (maximumTxnPerAccount 10, TxQ.cpp:384-462) + R-21 (queue minimum 2,000, TxQ.cpp:1366-1425) + scenario S-04: the eleventh transaction for one account is rejected, but the cap is per account, not per submitter.",
+   "id": "F-07",
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "The 10-per-account cap bounds single-account spam, but 200 coordinated accounts can still fill the minimum 2,000-transaction queue"
+  },
+  {
+   "evidence": "R-34 (tryClearAccountQueueUpThruTx, TxQ.cpp:518-560) + scenario S-05 run B: a single 1,000,000-level transaction clears three queued 256-level transactions.",
+   "id": "F-08",
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "Series rescue is dual-use: one rich transaction clears a stuck account queue, which also lets a well-funded submitter jump ahead of everyone else's queued transactions"
+  },
+  {
+   "evidence": "R-31 (retriesAllowed 10, TxQ.h:575-590; retryPenalty/dropPenalty, TxQ.h:665-690) + R-32 (expiry removal sets the drop penalty, TxQ.cpp:1366-1425) + scenario S-08 run B (retries exhausted, stalled).",
+   "id": "F-09",
+   "severity": "MEDIUM",
+   "status": "VERIFIED",
+   "title": "Retry and drop penalties are sticky per account: one expired transaction marks the account, and its later transactions get dropped when the queue is 95% full"
+  },
+  {
+   "evidence": "R-20 (OrderCandidates, TxQ.h:631-663): equal fee levels order by transaction ID XOR the parent ledger hash.",
+   "id": "F-10",
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "The fee-level tie-break is a parent-hash XOR: deterministic but unpredictable, so equal-fee ordering changes every ledger"
+  },
+  {
+   "evidence": "R-37 (doRPC, TxQ.cpp:1860-1910) + FeeEscalation.md (E43): 'The fee result is always instantaneous, and relates to the open ledger.'",
+   "id": "F-11",
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "The fee RPC open-ledger fee is instantaneous and can be stale the moment it is read; no reservation is made"
+  },
+  {
+   "evidence": "R-04 (base fee grows per signer, Transactor.cpp:331-347) + R-05 (fee level is fee times 256 over base fee) + scenario S-11: a 3-signature transaction paying 60 drops has fee level 384, below the minimum processing level 401.",
+   "id": "F-12",
+   "severity": "LOW",
+   "status": "VERIFIED",
+   "title": "Multi-signed transactions pay more drops for the same fee level: fee level, not drops, decides queue order"
+  }
+ ],
+ "pack": "Fee-Market and Transaction-Pricing in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55"
+}

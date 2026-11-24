@@ -1,0 +1,78 @@
+{
+ "pack": "Fee-Market and Transaction-Pricing in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "counts": {
+  "rules": {
+   "total": 45,
+   "by_status": {
+    "VERIFIED": 38,
+    "SPECIFIED": 4,
+    "MODELLED": 2,
+    "UNTESTABLE": 1
+   }
+  },
+  "scenarios": {
+   "total": 13,
+   "runs": 18,
+   "priced": 5,
+   "queued": 5,
+   "evicted": 6,
+   "stalled": 2
+  },
+  "findings": {
+   "total": 12,
+   "by_severity": {
+    "HIGH": 3,
+    "LOW": 3,
+    "MEDIUM": 6
+   },
+   "by_status": {
+    "VERIFIED": 12
+   }
+  },
+  "claims": {
+   "total": 24,
+   "by_status": {
+    "MODELLED": 4,
+    "SPECIFIED": 2,
+    "UNTESTABLE": 2,
+    "VERIFIED": 16
+   }
+  },
+  "risks": {
+   "total": 14,
+   "by_severity": {
+    "HIGH": 3,
+    "LOW": 3,
+    "MEDIUM": 8
+   }
+  },
+  "gaps": 8
+ },
+ "probes": {
+  "passed": 12,
+  "total": 12
+ },
+ "results_sha256": "09850198fa6f62d008e04d8900812aad157ce051e36cd1cec3045319ebc8249d",
+ "matrix_sha256": "4bf26daafcc637909e3bf414fe8c7c672861824bbb0d29073b0e21e551a1d6ba",
+ "verify_digests_sha256": "d3674c5818f6ce7f1d953a17f6fa2031af0309b1ef4a4d3b733d10972a690a32",
+ "verification": {
+  "excerpts": 44,
+  "source_files": 8
+ },
+ "reproductions": [
+  {
+   "label": "fresh-clone-1",
+   "log": "outputs/fresh-clone-run.log",
+   "sha256": "cd91e248f63528ae3f4c422b9dfe7ad3e873e7ced51c1d621207804f7423e711",
+   "status": "pass"
+  },
+  {
+   "label": "fresh-clone-2",
+   "log": "outputs/fresh-clone-2-run.log",
+   "sha256": "cd91e248f63528ae3f4c422b9dfe7ad3e873e7ced51c1d621207804f7423e711",
+   "status": "pass"
+  }
+ ],
+ "status": "SOURCE-DERIVED"
+}
