@@ -1,0 +1,59 @@
+# Source excerpt E26 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1570-1620.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1570-1620 ---
+    // parent hash, so that transactions paying the same fee are
+    // reordered.
+    LedgerHash const& parentHash = view.info().parentHash;
+    if (parentHash == parentHash_)
+        JLOG(j_.warn()) << "Parent ledger hash unchanged from " << parentHash;
+    else
+        parentHash_ = parentHash;
+
+    [[maybe_unused]] auto const startingSize = byFee_.size();
+    // byFee_ doesn't "own" the candidate objects inside it, so it's
+    // perfectly safe to wipe it and start over, repopulating from
+    // byAccount_.
+    //
+    // In the absence of a "re-sort the list in place" function, this
+    // was the fastest method tried to repopulate the list.
+    // Other methods included: create a new list and moving items over one at a
+    // time, create a new list and merge the old list into it.
+    byFee_.clear();
+
+    MaybeTx::parentHashComp = parentHash;
+
+    for (auto& [_, account] : byAccount_)
+    {
+        for (auto& [_, candidate] : account.transactions)
+        {
+            byFee_.insert(candidate);
+        }
+    }
+    XRPL_ASSERT(
+        byFee_.size() == startingSize,
+        "ripple::TxQ::accept : byFee size match");
+
+    return ledgerChanged;
+}
+
+// Public entry point for nextQueuableSeq().
+//
+// Acquires a lock and calls the implementation.
+SeqProxy
+TxQ::nextQueuableSeq(std::shared_ptr<SLE const> const& sleAccount) const
+{
+    std::lock_guard<std::mutex> lock(mutex_);
+    return nextQueuableSeqImpl(sleAccount, lock);
+}
+
+// The goal is to return a SeqProxy for a sequence that will fill the next
+// available hole in the queue for the passed in account.
+//
+// If there are queued transactions for the account then the first viable
+// sequence number, that is not used by a transaction in the queue, must
+// be found and returned.

@@ -1,0 +1,76 @@
+# Source excerpt E31 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1915-1982.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1915-1982 ---
+setup_TxQ(Config const& config)
+{
+    TxQ::Setup setup;
+    auto const& section = config.section("transaction_queue");
+    set(setup.ledgersInQueue, "ledgers_in_queue", section);
+    set(setup.queueSizeMin, "minimum_queue_size", section);
+    set(setup.retrySequencePercent, "retry_sequence_percent", section);
+    set(setup.minimumEscalationMultiplier,
+        "minimum_escalation_multiplier",
+        section);
+    set(setup.minimumTxnInLedger, "minimum_txn_in_ledger", section);
+    set(setup.minimumTxnInLedgerSA,
+        "minimum_txn_in_ledger_standalone",
+        section);
+    set(setup.targetTxnInLedger, "target_txn_in_ledger", section);
+    std::uint32_t max;
+    if (set(max, "maximum_txn_in_ledger", section))
+    {
+        if (max < setup.minimumTxnInLedger)
+        {
+            Throw<std::runtime_error>(
+                "The minimum number of low-fee transactions allowed "
+                "per ledger (minimum_txn_in_ledger) exceeds "
+                "the maximum number of low-fee transactions allowed per "
+                "ledger (maximum_txn_in_ledger).");
+        }
+        if (max < setup.minimumTxnInLedgerSA)
+        {
+            Throw<std::runtime_error>(
+                "The minimum number of low-fee transactions allowed "
+                "per ledger (minimum_txn_in_ledger_standalone) exceeds "
+                "the maximum number of low-fee transactions allowed per "
+                "ledger (maximum_txn_in_ledger).");
+        }
+
+        setup.maximumTxnInLedger.emplace(max);
+    }
+
+    /* The math works as expected for any value up to and including
+       MAXINT, but put a reasonable limit on this percentage so that
+       the factor can't be configured to render escalation effectively
+       moot. (There are other ways to do that, including
+       minimum_txn_in_ledger.)
+    */
+    set(setup.normalConsensusIncreasePercent,
+        "normal_consensus_increase_percent",
+        section);
+    setup.normalConsensusIncreasePercent =
+        std::clamp(setup.normalConsensusIncreasePercent, 0u, 1000u);
+
+    /* If this percentage is outside of the 0-100 range, the results
+       are nonsensical (uint overflows happen, so the limit grows
+       instead of shrinking). 0 is not recommended.
+    */
+    set(setup.slowConsensusDecreasePercent,
+        "slow_consensus_decrease_percent",
+        section);
+    setup.slowConsensusDecreasePercent =
+        std::clamp(setup.slowConsensusDecreasePercent, 0u, 100u);
+
+    set(setup.maximumTxnPerAccount, "maximum_txn_per_account", section);
+    set(setup.minimumLastLedgerBuffer, "minimum_last_ledger_buffer", section);
+
+    setup.standAlone = config.standalone();
+    return setup;
+}
+
+}  // namespace ripple

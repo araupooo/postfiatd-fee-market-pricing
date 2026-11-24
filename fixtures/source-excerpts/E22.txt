@@ -1,0 +1,99 @@
+# Source excerpt E22 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1040-1130.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1040-1130 ---
+                    return {telCAN_NOT_QUEUE, false};
+            }
+
+            // Sum fees and spending for all of the queued transactions
+            // so we know how much to remove from the account balance
+            // for the trial preclaim.
+            XRPAmount potentialSpend = beast::zero;
+            XRPAmount totalFee = beast::zero;
+            for (auto iter = txIter->first; iter != txIter->end; ++iter)
+            {
+                // If we're replacing this transaction don't include
+                // the replaced transaction's XRP spend.  Otherwise add
+                // it to potentialSpend.
+                if (iter->first != txSeqProx)
+                {
+                    totalFee += iter->second.consequences().fee();
+                    potentialSpend +=
+                        iter->second.consequences().potentialSpend();
+                }
+                else if (std::next(iter) != txIter->end)
+                {
+                    // The fee for the candidate transaction _should_ be
+                    // counted if it's replacing a transaction in the middle
+                    // of the queue.
+                    totalFee += pfresult.consequences.fee();
+                    potentialSpend += pfresult.consequences.potentialSpend();
+                }
+            }
+
+            /* Check if the total fees in flight are greater
+                than the account's current balance, or the
+                minimum reserve. If it is, then there's a risk
+                that the fees won't get paid, so drop this
+                transaction with a telCAN_NOT_QUEUE_BALANCE result.
+                Assume: Minimum account reserve is 20 XRP.
+                Example 1: If I have 1,000,000 XRP, I can queue
+                    a transaction with a 1,000,000 XRP fee. In
+                    the meantime, some other transaction may
+                    lower my balance (eg. taking an offer). When
+                    the transaction executes, I will either
+                    spend the 1,000,000 XRP, or the transaction
+                    will get stuck in the queue with a
+                    `terINSUF_FEE_B`.
+                Example 2: If I have 1,000,000 XRP, and I queue
+                    10 transactions with 0.1 XRP fee, I have 1 XRP
+                    in flight. I can now queue another tx with a
+                    999,999 XRP fee. When the first 10 execute,
+                    they're guaranteed to pay their fee, because
+                    nothing can eat into my reserve. The last
+                    transaction, again, will either spend the
+                    999,999 XRP, or get stuck in the queue.
+                Example 3: If I have 1,000,000 XRP, and I queue
+                    7 transactions with 3 XRP fee, I have 21 XRP
+                    in flight. I can not queue any more transactions,
+                    no matter how small or large the fee.
+                Transactions stuck in the queue are mitigated by
+                LastLedgerSeq and MaybeTx::retriesRemaining.
+            */
+            auto const balance = (*sleAccount)[sfBalance].xrp();
+            /* Get the minimum possible account reserve. If it
+               is at least 10 * the base fee, and fees exceed
+               this amount, the transaction can't be queued.
+
+               Currently typical fees are several orders
+               of magnitude smaller than any current or expected
+               future reserve. This calculation is simpler than
+               trying to figure out the potential changes to
+               the ownerCount that may occur to the account
+               as a result of these transactions, and removes
+               any need to account for other transactions that
+               may affect the owner count while these are queued.
+
+               However, in case the account reserve is on a
+               comparable scale to the base fee, ignore the
+               reserve. Only check the account balance.
+            */
+            auto const reserve = view.fees().accountReserve(0);
+            auto const base = view.fees().base;
+            if (totalFee >= balance ||
+                (reserve > 10 * base && totalFee >= reserve))
+            {
+                // Drop the current transaction
+                JLOG(j_.trace()) << "Ignoring transaction " << transactionID
+                                 << ". Total fees in flight too high.";
+                return {telCAN_NOT_QUEUE_BALANCE, false};
+            }
+
+            // Create the test view from the current view.
+            multiTxn.emplace(view, flags);
+
+            auto const sleBump = multiTxn->applyView.peek(accountKey);

@@ -1,0 +1,86 @@
+# Source excerpt E23 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/TxQ.cpp, lines 1243-1320.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 3f4c116488fc7d1e16b7f8c0ffbf92bfff33b778a7b3023fa2fc75783aecf297
+# Source file git blob SHA: 6924dae6c82d0608d9520a551fd52c4a3257daf8
+# Source file size: 78017 bytes
+
+# --- src/xrpld/app/misc/detail/TxQ.cpp lines 1243-1320 ---
+    if (!replacedTxIter && isFull())
+    {
+        auto lastRIter = byFee_.rbegin();
+        while (lastRIter != byFee_.rend() && lastRIter->account == account)
+        {
+            ++lastRIter;
+        }
+        if (lastRIter == byFee_.rend())
+        {
+            // The only way this condition can happen is if the entire
+            // queue is filled with transactions from this account. This
+            // is impossible with default settings - minimum queue size
+            // is 2000, and an account can only have 10 transactions
+            // queued. However, it can occur if settings are changed,
+            // and there is unit test coverage.
+            JLOG(j_.info())
+                << "Queue is full, and transaction " << transactionID
+                << " would kick a transaction from the same account ("
+                << account << ") out of the queue.";
+            return {telCAN_NOT_QUEUE_FULL, false};
+        }
+        auto const& endAccount = byAccount_.at(lastRIter->account);
+        auto endEffectiveFeeLevel = [&]() {
+            // Compute the average of all the txs for the endAccount,
+            // but only if the last tx in the queue has a lower fee
+            // level than this candidate tx.
+            if (lastRIter->feeLevel > feeLevelPaid ||
+                endAccount.transactions.size() == 1)
+                return lastRIter->feeLevel;
+
+            constexpr FeeLevel64 max{std::numeric_limits<std::uint64_t>::max()};
+            auto endTotal = std::accumulate(
+                endAccount.transactions.begin(),
+                endAccount.transactions.end(),
+                std::pair<FeeLevel64, FeeLevel64>(0, 0),
+                [&](auto const& total,
+                    auto const& txn) -> std::pair<FeeLevel64, FeeLevel64> {
+                    // Check for overflow.
+                    auto next =
+                        txn.second.feeLevel / endAccount.transactions.size();
+                    auto mod =
+                        txn.second.feeLevel % endAccount.transactions.size();
+                    if (total.first >= max - next || total.second >= max - mod)
+                        return {max, FeeLevel64{0}};
+
+                    return {total.first + next, total.second + mod};
+                });
+            return endTotal.first +
+                endTotal.second / endAccount.transactions.size();
+        }();
+        if (feeLevelPaid > endEffectiveFeeLevel)
+        {
+            // The queue is full, and this transaction is more
+            // valuable, so kick out the cheapest transaction.
+            auto dropRIter = endAccount.transactions.rbegin();
+            XRPL_ASSERT(
+                dropRIter->second.account == lastRIter->account,
+                "ripple::TxQ::apply : cheapest transaction found");
+            JLOG(j_.info())
+                << "Removing last item of account " << lastRIter->account
+                << " from queue with average fee of " << endEffectiveFeeLevel
+                << " in favor of " << transactionID << " with fee of "
+                << feeLevelPaid;
+            erase(byFee_.iterator_to(dropRIter->second));
+        }
+        else
+        {
+            JLOG(j_.info())
+                << "Queue is full, and transaction " << transactionID
+                << " fee is lower than end item's account average fee";
+            return {telCAN_NOT_QUEUE_FULL, false};
+        }
+    }
+
+    // Hold the transaction in the queue.
+    if (replacedTxIter)
+    {
+        replacedTxIter = removeFromByFee(replacedTxIter, tx);
