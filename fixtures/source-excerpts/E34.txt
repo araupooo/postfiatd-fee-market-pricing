@@ -1,0 +1,35 @@
+# Source excerpt E34 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/LoadFeeTrack.cpp, lines 32-58.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f651538c0fca77d96169c474e4c1abb8251c1c6ca6d869e4f68f1b67d57206a0
+# Source file git blob SHA: 4728df9272983774da393a0a0284a0ac8d41c511
+# Source file size: 3364 bytes
+
+# --- src/xrpld/app/misc/detail/LoadFeeTrack.cpp lines 32-58 ---
+LoadFeeTrack::raiseLocalFee()
+{
+    std::lock_guard sl(lock_);
+
+    if (++raiseCount_ < 2)
+        return false;
+
+    std::uint32_t const origFee = localTxnLoadFee_;
+
+    // make sure this fee takes effect
+    if (localTxnLoadFee_ < remoteTxnLoadFee_)
+        localTxnLoadFee_ = remoteTxnLoadFee_;
+
+    // Increase slowly
+    localTxnLoadFee_ += (localTxnLoadFee_ / lftFeeIncFraction);
+
+    if (localTxnLoadFee_ > lftFeeMax)
+        localTxnLoadFee_ = lftFeeMax;
+
+    if (origFee == localTxnLoadFee_)
+        return false;
+
+    JLOG(j_.debug()) << "Local load fee raised from " << origFee << " to "
+                     << localTxnLoadFee_;
+    return true;
+}
+

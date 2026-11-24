@@ -1,0 +1,35 @@
+# Source excerpt E41 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/FeeEscalation.md, lines 226-252.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 45c99ed0aefc44d09372441495e821fa14bf343ea157e807e9b9bad3be88e071
+# Source file git blob SHA: 468ab2b52822b7c4bb552908c4a0eea4897f1695
+# Source file size: 19544 bytes
+
+# --- src/xrpld/app/misc/FeeEscalation.md lines 226-252 ---
+- _Base fee transaction limit per ledger_. The minimum value of 5 was
+  chosen to ensure the limit never gets so small that the ledger becomes
+  unusable. The "target" value of 50 was chosen so the limit never gets large
+  enough to invite abuse, but keeps up if the network stays healthy and
+  active. These exact values were chosen experimentally, and can easily
+  change in the future.
+- _Expected ledger size growth and reduction percentages_. The growth
+  value of 20% was chosen to allow the limit to grow quickly as load
+  increases, but not so quickly as to allow bad actors to run unrestricted.
+  The reduction value of 50% was chosen to cause the limit to drop
+  significantly, but not so drastically that the limit cannot quickly
+  recover if the problem is temporary. These exact values were chosen
+  experimentally, and can easily change in the future.
+- _Minimum `lastLedgerMedianFeeLevel`_. The value of 500 was chosen to
+  ensure that the first escalated fee was more significant and noticable
+  than what the default would allow. This exact value was chosen
+  experimentally, and can easily change in the future.
+- _Transaction queue size limit_. The limit is computed based on the
+  base fee transaction limit per ledger, so that the queue can grow
+  automatically as the network's performance improves, allowing
+  more transactions per second, and thus more transactions per ledger
+  to process successfully. The limit of 20 ledgers was used to provide
+  a balance between resource (specifically memory) usage, and giving
+  transactions a realistic chance to be processed. The minimum size of
+  2000 transactions was chosen to allow a decent functional backlog during
+  network congestion conditions. These exact values were
+  chosen experimentally, and can easily change in the future.

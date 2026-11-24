@@ -1,0 +1,43 @@
+# Source excerpt E43 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/FeeEscalation.md, lines 286-320.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 45c99ed0aefc44d09372441495e821fa14bf343ea157e807e9b9bad3be88e071
+# Source file git blob SHA: 468ab2b52822b7c4bb552908c4a0eea4897f1695
+# Source file size: 19544 bytes
+
+# --- src/xrpld/app/misc/FeeEscalation.md lines 286-320 ---
+
+`fee` takes no parameters, and returns information about the current local
+[fee escalation](#fee-escalation) and [transaction queue](#transaction-queue)
+state as both fee levels and drops. The drop values assume a
+single-singed reference transaction. It is up to the user to compute the
+necessary fees for other types of transactions. (E.g. multiply all drop
+values by 5 for a multi-signed transaction with 4 signatures.)
+
+The `fee` result is always instantanteous, and relates to the open
+ledger. It includes the sequence number of the current open ledger,
+but may not make sense if rippled is not synced to the network.
+
+Result format:
+
+```
+{
+   "result" : {
+      "current_ledger_size" : "16", // number of transactions in the open ledger
+      "current_queue_size" : "2", // number of transactions waiting in the queue
+      "expected_ledger_size" : "15", // one less than the number of transactions that can get into the open ledger for the base fee.
+      "max_queue_size" : "300", // number of transactions allowed into the queue
+      "ledger_current_index" : 123456789, // sequence number of the current open ledger
+      "levels" : {
+         "reference_level" : "256", // level of a reference transaction. Always 256.
+         "minimum_level" : "256", // minimum fee level to get into the queue. If >256, indicates the queue is full.
+         "median_level" : "281600", // lastLedgerMedianFeeLevel used in escalation calculations.
+         "open_ledger_level" : "320398" // minimum fee level to get into the open ledger immediately.
+      },
+      "drops" : {
+         "base_fee" : "10", // base fee of a reference transaction in drops.
+         "minimum_fee" : "10", // minimum drops to get a reference transaction into the queue. If >base_fee, indicates the queue is full.
+         "median_fee" : "11000", // drop equivalent of "median_level" for a reference transaction.
+         "open_ledger_fee" : "12516" // minimum drops to get a reference transaction into the open ledger immediately.
+      }
+   }

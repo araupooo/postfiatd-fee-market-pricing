@@ -1,0 +1,15 @@
+# Source excerpt E44 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: include/xrpl/protocol/Fees.h, lines 32-38.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: d32c6566e165080e908da0c696245853b581e02f1e817486f278b05e58d4faad
+# Source file git blob SHA: 4393f1a1d9cf46ef079bf647494c66b770d71de6
+# Source file size: 2011 bytes
+
+# --- include/xrpl/protocol/Fees.h lines 32-38 ---
+struct Fees
+{
+    XRPAmount base{0};       // Reference tx cost (drops)
+    XRPAmount reserve{0};    // Reserve base (drops)
+    XRPAmount increment{0};  // Reserve increment (drops)
+
+    explicit Fees() = default;

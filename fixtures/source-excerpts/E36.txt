@@ -1,0 +1,37 @@
+# Source excerpt E36 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/detail/LoadFeeTrack.cpp, lines 84-112.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: f651538c0fca77d96169c474e4c1abb8251c1c6ca6d869e4f68f1b67d57206a0
+# Source file git blob SHA: 4728df9272983774da393a0a0284a0ac8d41c511
+# Source file size: 3364 bytes
+
+# --- src/xrpld/app/misc/detail/LoadFeeTrack.cpp lines 84-112 ---
+scaleFeeLoad(
+    XRPAmount fee,
+    LoadFeeTrack const& feeTrack,
+    Fees const& fees,
+    bool bUnlimited)
+{
+    if (fee == 0)
+        return fee;
+
+    // Collect the fee rates
+    auto [feeFactor, uRemFee] = feeTrack.getScalingFactors();
+
+    // Let privileged users pay the normal fee until
+    //   the local load exceeds four times the remote.
+    if (bUnlimited && (feeFactor > uRemFee) && (feeFactor < (4 * uRemFee)))
+        feeFactor = uRemFee;
+
+    // Compute:
+    // fee = fee * feeFactor / (lftNormalFee);
+    // without overflow, and as accurately as possible
+
+    auto const result = mulDiv(
+        fee, feeFactor, safe_cast<std::uint64_t>(feeTrack.getLoadBase()));
+    if (!result)
+        Throw<std::overflow_error>("scaleFeeLoad");
+    return *result;
+}
+
+}  // namespace ripple

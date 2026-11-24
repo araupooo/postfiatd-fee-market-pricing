@@ -1,0 +1,23 @@
+# Source excerpt E37 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/main/LoadManager.cpp, lines 176-190.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 72ddd0a5bc77f6b3ec29f88fc55583391853992fa66d39b958bf437038c191f0
+# Source file git blob SHA: 9ae9e44a3a5d87ba2587b18f7b24c6566a99e312
+# Source file size: 6310 bytes
+
+# --- src/xrpld/app/main/LoadManager.cpp lines 176-190 ---
+    bool change = false;
+    if (app_.getJobQueue().isOverloaded())
+    {
+        JLOG(journal_.info()) << "Raising local fee (JQ overload): "
+                              << app_.getJobQueue().getJson(0);
+        change = app_.getFeeTrack().raiseLocalFee();
+    }
+    else
+    {
+        change = app_.getFeeTrack().lowerLocalFee();
+    }
+
+    if (change)
+    {
+        // VFALCO TODO replace this with a Listener / observer and

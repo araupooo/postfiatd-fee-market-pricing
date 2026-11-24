@@ -1,0 +1,63 @@
+# Source excerpt E40 — postfiatd 0085a1ff885d6a446369cf73a4430f75af22be55.
+# File: src/xrpld/app/misc/FeeEscalation.md, lines 14-68.
+# Line numbers verified with grep -n on a local checkout of the pinned commit.
+# Source file SHA-256: 45c99ed0aefc44d09372441495e821fa14bf343ea157e807e9b9bad3be88e071
+# Source file git blob SHA: 468ab2b52822b7c4bb552908c4a0eea4897f1695
+# Source file size: 19544 bytes
+
+# --- src/xrpld/app/misc/FeeEscalation.md lines 14-68 ---
+legitimate users the ability to pay a higher fee to get high-priority
+transactions into the open ledger, even during unfavorable conditions.
+
+How fees escalate:
+
+1. There is a base [fee level](#fee-level) of 256,
+   which is the minimum that a typical transaction
+   is required to pay. For a [reference
+   transaction](#reference-transaction), that corresponds to the
+   network base fee, which is currently 10 drops.
+2. However, there is a limit on the number of transactions that
+   can get into an open ledger for that base fee level. The limit
+   will vary based on the [health](#consensus-health) of the
+   consensus process, but will be at least [5](#other-constants).
+
+- If consensus stays [healthy](#consensus-health), the limit will
+  be the max of the number of transactions in the validated ledger
+  plus [20%](#other-constants) or the current limit until it gets
+  to [50](#other-constants), at which point, the limit will be the
+  largest number of transactions plus [20%](#other-constants)
+  in the last [20](#other-constants) validated ledgers which had
+  more than [50](#other-constants) transactions. Any time the limit
+  decreases (i.e. a large ledger is no longer recent), the limit will
+  decrease to the new largest value by 10% each time the ledger has
+  more than 50 transactions.
+- If consensus does not stay [healthy](#consensus-health),
+  the limit will clamp down to the smaller of the number of
+  transactions in the validated ledger minus [50%](#other-constants)
+  or the previous limit minus [50%](#other-constants).
+- The intended effect of these mechanisms is to allow as many base fee
+  level transactions to get into the ledger as possible while the
+  network is [healthy](#consensus-health), but to respond quickly to
+  any condition that makes it [unhealthy](#consensus-health), including,
+  but not limited to, malicious attacks.
+
+3. Once there are more transactions in the open ledger than indicated
+   by the limit, the required fee level jumps drastically.
+
+- The formula is `( lastLedgerMedianFeeLevel *
+TransactionsInOpenLedger^2 / limit^2 )`,
+  and returns a [fee level](#fee-level).
+
+4. That may still be pretty small, but as more transactions get
+   into the ledger, the fee level increases exponentially.
+
+- For example, if the limit is 6, and the median fee is minimal,
+  and assuming all [reference transactions](#reference-transaction),
+  the 8th transaction only requires a [level](#fee-level) of about 174,000
+  or about 6800 drops,
+  but the 20th transaction requires a [level](#fee-level) of about
+  1,283,000 or about 50,000 drops.
+
+5. Finally, as each ledger closes, the median fee level of that ledger is
+   computed and used as `lastLedgerMedianFeeLevel` (with a
+   [minimum value of 128,000](#other-constants))
