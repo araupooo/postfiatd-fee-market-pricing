@@ -1,0 +1,83 @@
+{
+ "checks": [
+  {
+   "check": "pinned checkout HEAD equals the pinned commit",
+   "detail": "HEAD=0085a1ff885d6a446369cf73a4430f75af22be55",
+   "id": "A-00",
+   "pass": true
+  },
+  {
+   "check": "45 rules: 38 VERIFIED anchors inside cited ranges, 4 SPECIFIED (external URLs), 2 MODELLED, 1 UNTESTABLE, none with a faked source",
+   "detail": "counts={'MODELLED': 2, 'SPECIFIED': 4, 'UNTESTABLE': 1, 'VERIFIED': 38}",
+   "id": "A-01",
+   "pass": true
+  },
+  {
+   "check": "per-scenario arithmetic reconciles; totals 13 scenarios / 18 runs / priced 5 / queued 5 / evicted 6 / stalled 2; matrix rows == runs; required levels, minimum processing levels, and fee levels re-derived; outcomes and reasons re-derived from the scenario params",
+   "detail": "totals={'evicted': 6, 'priced': 5, 'queued': 5, 'runs': 18, 'scenarios': 13, 'stalled': 2} outcomes={'queued': 5, 'priced': 5, 'evicted': 6, 'stalled': 2} ",
+   "id": "B-01",
+   "pass": true
+  },
+  {
+   "check": "threshold rows match the quadratic escalation math for 7 target/multiplier/open-count triples; limits table matches the pinned constants (256 base level, 128,000 minimum multiplier, 32/1,000 minimum, 256 target, 20 ledgers in queue, 2,000 minimum queue, 10 per account, 10 retries, 25% premium, 2-ledger buffer, 256 normal load, 1/4 step, 256,000,000 maximum load, 4x privileged cap, 2^21 series guard, 100% full, 95% penalty, 10-drop base fee)",
+   "detail": "all match",
+   "id": "C-01",
+   "pass": true
+  },
+  {
+   "check": "baseLevel 256 (TxQ.h:64), ledgersInQueue 20 (:81), queueSizeMin 2000 (:87), retrySequencePercent 25 (:97), minimumEscalationMultiplier baseLevel * 500 (:100), minimumTxnInLedger 32 (:103), targetTxnInLedger 256 (:109), maximumTxnPerAccount 10 (:148), minimumLastLedgerBuffer 2 (:155), retriesAllowed 10 (:580), lftNormalFee (LoadFeeTrack.h:141), lftFeeMax (LoadFeeTrack.h:147), median fee levels (TxQ.cpp:161), quadratic mulDiv (TxQ.cpp:187), signerCount * baseFee (Transactor.cpp:345)",
+   "detail": "all 15 tokens at recorded lines",
+   "id": "D-01",
+   "pass": true
+  },
+  {
+   "check": "fee-level descending order with the parent-hash tie-break; isFull at 100% of maxSize_; maxSize_ is max(txnsExpected * ledgersInQueue, queueSizeMin); accept applies a queued transaction only at or above the required level; expired transactions are removed at ledger close; series rescue uses the escalated series level",
+   "detail": "queue logic verified",
+   "id": "E-01",
+   "pass": true
+  },
+  {
+   "check": "matrix == results == scenarios (13); findings 12 (HIGH 3, MEDIUM 6, LOW 3), claims 24 (16/2/4/2), risks 14 (HIGH 3, MEDIUM 8, LOW 3), gaps 8; excerpts 44 across 8 files agree across manifest, files, hashes",
+   "detail": "claims=24 risks=14 gaps=8 excerpts=44 files=8",
+   "id": "F-01",
+   "pass": true
+  },
+  {
+   "check": "determinism: simulator re-run reproduces byte-identical results and matrix (full SHA-256)",
+   "detail": "results shipped=09850198fa6f62d008e04d8900812aad157ce051e36cd1cec3045319ebc8249d rerun=09850198fa6f62d008e04d8900812aad157ce051e36cd1cec3045319ebc8249d; matrix shipped=4bf26daafcc637909e3bf414fe8c7c672861824bbb0d29073b0e21e551a1d6ba rerun=4bf26daafcc637909e3bf414fe8c7c672861824bbb0d29073b0e21e551a1d6ba",
+   "id": "G-01",
+   "pass": true
+  },
+  {
+   "check": "every excerpt digest matches source-hashes.json; every manifest blob SHA/size matches the checkout; run-manifest digests match shipped derived files; recorded reproduction log digests match the fresh-clone logs on disk; recorded verify-digests digest matches outputs/verify-digests.log when present",
+   "detail": "manifest digests match",
+   "id": "H-01",
+   "pass": true
+  },
+  {
+   "check": "absence findings re-grepped: std::exp 0 hits in TxQ.cpp and LoadFeeTrack.cpp; maxFeeLevel 0 hits; discount 0 hits; no per-account fee discount token; the escalation multiplier is never capped with std::min; 'exponentially' appears 0 times in TxQ.cpp",
+   "detail": "std::exp=0 maxFeeLevel=0 discount=0 perAccountFee=0 min-cap=0 exponentially=0",
+   "id": "I-01",
+   "pass": true
+  },
+  {
+   "check": "the design document says the fee level 'increases exponentially' (FeeEscalation.md:57) while the code computes a quadratic; the document says minimum 5 / target 50 (FeeEscalation.md:226-228) while the code says 32 / 256; the class comment repeats the exponential claim (TxQ.h:48)",
+   "detail": "divergence tokens verified",
+   "id": "J-01",
+   "pass": true
+  },
+  {
+   "check": "timing sanity: total probe elapsed_ms is non-negative (loose band, never exact)",
+   "detail": "value not recorded; never compared",
+   "id": "T-01",
+   "pass": true
+  }
+ ],
+ "matrix_sha256": "4bf26daafcc637909e3bf414fe8c7c672861824bbb0d29073b0e21e551a1d6ba",
+ "pack": "Fee-Market and Transaction-Pricing in postfiatd",
+ "passed": 12,
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "results_file": "outputs/derived/fee-market-results.json",
+ "results_sha256": "09850198fa6f62d008e04d8900812aad157ce051e36cd1cec3045319ebc8249d",
+ "total": 12
+}

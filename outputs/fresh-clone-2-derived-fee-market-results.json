@@ -1,0 +1,1327 @@
+{
+ "constants": {
+  "base_fee_drops": 10,
+  "base_level": 256,
+  "ledgers_in_queue": 20,
+  "load_fee_max": 256000000,
+  "load_normal_fee": 256,
+  "maximum_txn_per_account": 10,
+  "minimum_escalation_multiplier": 128000,
+  "minimum_last_ledger_buffer": 2,
+  "minimum_txn_in_ledger": 32,
+  "minimum_txn_in_ledger_standalone": 1000,
+  "privileged_load_cap_multiple": 4,
+  "queue_size_min": 2000,
+  "retries_allowed": 10,
+  "retry_sequence_percent": 25,
+  "series_overflow_guard": 2097152,
+  "target_txn_in_ledger": 256
+ },
+ "limits_table": [
+  {
+   "item": "base fee level",
+   "unit": "level",
+   "value": 256
+  },
+  {
+   "item": "minimum escalation multiplier",
+   "unit": "level",
+   "value": 128000
+  },
+  {
+   "item": "minimum transactions per ledger",
+   "unit": "transactions",
+   "value": 32
+  },
+  {
+   "item": "minimum transactions per ledger (standalone)",
+   "unit": "transactions",
+   "value": 1000
+  },
+  {
+   "item": "target transactions per ledger",
+   "unit": "transactions",
+   "value": 256
+  },
+  {
+   "item": "ledgers in queue",
+   "unit": "ledgers",
+   "value": 20
+  },
+  {
+   "item": "minimum queue size",
+   "unit": "transactions",
+   "value": 2000
+  },
+  {
+   "item": "maximum transactions per account",
+   "unit": "transactions",
+   "value": 10
+  },
+  {
+   "item": "maximum retries",
+   "unit": "attempts",
+   "value": 10
+  },
+  {
+   "item": "replacement premium",
+   "unit": "percent",
+   "value": 25
+  },
+  {
+   "item": "minimum last-ledger buffer",
+   "unit": "ledgers",
+   "value": 2
+  },
+  {
+   "item": "normal load factor",
+   "unit": "factor",
+   "value": 256
+  },
+  {
+   "item": "load step",
+   "unit": "fraction",
+   "value": "1/4"
+  },
+  {
+   "item": "maximum load factor",
+   "unit": "factor",
+   "value": 256000000
+  },
+  {
+   "item": "privileged load cap",
+   "unit": "x remote factor",
+   "value": 4
+  },
+  {
+   "item": "series overflow guard",
+   "unit": "transactions",
+   "value": 2097152
+  },
+  {
+   "item": "queue-full threshold",
+   "unit": "percent",
+   "value": 100
+  },
+  {
+   "item": "penalty threshold",
+   "unit": "percent",
+   "value": 95
+  },
+  {
+   "item": "reference base fee",
+   "unit": "drops",
+   "value": 10
+  }
+ ],
+ "pack": "Fee-Market and Transaction-Pricing in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "scenarios": [
+  {
+   "id": "S-01",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "40 transactions are already in the open ledger against a target of 32; the required fee level is 200,000"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 256, far below the required 200,000"
+      },
+      {
+       "round": 1,
+       "text": "fee level 256 is below the required level 200000: held in the queue for a later ledger"
+      }
+     ],
+     "fee_level": 256,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "queued",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 256,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "below_open_ledger_level_queued",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "Base-fee transaction during a fee spike"
+    },
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "40 transactions are already in the open ledger against a target of 32; the required fee level is 200,000"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 250,000, above the required 200,000"
+      },
+      {
+       "round": 1,
+       "text": "fee level 250000 is at or above the required level 200000: applies to the open ledger"
+      }
+     ],
+     "fee_level": 250000,
+     "label": "B",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "priced",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 250000,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "at_or_above_required_open_ledger_level",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "High-fee transaction during a fee spike"
+    }
+   ],
+   "title": "Fee spike, cold start"
+  },
+  {
+   "id": "S-02",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "300 transactions are already in the open ledger against a target of 256; the median fee level is 281,600 and the required level is 386,718"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 256, far below the required 386,718"
+      },
+      {
+       "round": 1,
+       "text": "fee level 256 is below the required level 386718: held in the queue for a later ledger"
+      }
+     ],
+     "fee_level": 256,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 281600,
+     "open_count": 300,
+     "outcome": "queued",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 256,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 281600,
+      "open_count": 300,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 256,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "below_open_ledger_level_queued",
+     "required_level": 386718,
+     "rounds": 1,
+     "target": 256,
+     "title": "Base-fee transaction above a healthy target"
+    },
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "300 transactions are already in the open ledger against a target of 256; the required level is 386,718"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 500,000, above the required 386,718"
+      },
+      {
+       "round": 1,
+       "text": "fee level 500000 is at or above the required level 386718: applies to the open ledger"
+      }
+     ],
+     "fee_level": 500000,
+     "label": "B",
+     "min_processing_level": 256,
+     "multiplier": 281600,
+     "open_count": 300,
+     "outcome": "priced",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 500000,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 281600,
+      "open_count": 300,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 256,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "at_or_above_required_open_ledger_level",
+     "required_level": 386718,
+     "rounds": 1,
+     "target": 256,
+     "title": "High-fee transaction above a healthy target"
+    }
+   ],
+   "title": "Fee spike, healthy ledger"
+  },
+  {
+   "id": "S-03",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the queue holds 2,000 transactions, the maximum; the lowest-fee account average is 256"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 256, not above the lowest-fee account average 256"
+      },
+      {
+       "round": 1,
+       "text": "queue is full and fee level 256 does not beat the lowest-fee account average 256: telCAN_NOT_QUEUE_FULL"
+      }
+     ],
+     "fee_level": 256,
+     "label": "A",
+     "min_processing_level": 257,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "evicted",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 256,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": 256,
+      "lowest_queued_level": 256,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 2000,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": true,
+     "queue_max": 2000,
+     "queue_size": 2000,
+     "reason": "below_lowest_account_average_when_full",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "Base-fee transaction against a full queue"
+    },
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the queue holds 2,000 transactions, the maximum; the lowest-fee account average is 256"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 512, above the lowest-fee account average 256"
+      },
+      {
+       "round": 1,
+       "text": "queue is full but fee level 512 beats the lowest-fee account average 256: admitted, cheapest transaction of that account is dropped"
+      }
+     ],
+     "fee_level": 512,
+     "label": "B",
+     "min_processing_level": 257,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "queued",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 512,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": 256,
+      "lowest_queued_level": 256,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 2000,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": true,
+     "queue_max": 2000,
+     "queue_size": 2000,
+     "reason": "admitted_displacing_cheapest",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "Mid-fee transaction against a full queue"
+    }
+   ],
+   "title": "Low-fee spam flood, full queue"
+  },
+  {
+   "id": "S-04",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the account already has 10 transactions queued, the maximum; the new transaction does not fill a sequence gap"
+      },
+      {
+       "round": 1,
+       "text": "the submitted transaction pays fee level 512 but the account is at its cap"
+      },
+      {
+       "round": 1,
+       "text": "account already has 10 queued transactions and the new one does not fill a sequence gap: telCAN_NOT_QUEUE_FULL"
+      }
+     ],
+     "fee_level": 512,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 10,
+     "outcome": "evicted",
+     "params": {
+      "account_queued": 10,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 512,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 10,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 100,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 100,
+     "reason": "per_account_cap_reached",
+     "required_level": 256,
+     "rounds": 1,
+     "target": 32,
+     "title": "Eleventh transaction for one account"
+    }
+   ],
+   "title": "Per-account queue cap"
+  },
+  {
+   "id": "S-05",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the account has 3 queued transactions; the new transaction pays fee level 100,000 but its sequence is not next"
+      },
+      {
+       "round": 1,
+       "text": "the transaction waits behind the account's earlier sequence"
+      },
+      {
+       "round": 3,
+       "text": "a lower-sequence transaction for the same account is ahead in the queue: this transaction cannot apply first"
+      }
+     ],
+     "fee_level": 100000,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "stalled",
+     "params": {
+      "account_queued": 3,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 100000,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 3,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": false,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "blocked_behind_sequence_gap",
+     "required_level": 200000,
+     "rounds": 3,
+     "target": 32,
+     "title": "High-fee transaction stuck behind a low-fee predecessor"
+    },
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the account has 3 queued transactions at fee level 256 each; the new transaction pays fee level 1,000,000"
+      },
+      {
+       "round": 1,
+       "text": "the summed series fee level 1,000,768 covers the escalated series requirement 903,750"
+      },
+      {
+       "round": 1,
+       "text": "summed series fee level 1000768 covers the escalated series requirement 903750: the whole account queue clears into the open ledger"
+      }
+     ],
+     "fee_level": 1000000,
+     "label": "B",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "priced",
+     "params": {
+      "account_queued": 3,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 1000000,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": 903750,
+      "series_total": 1000768,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "series_rescue_clears_account_queue",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "Series rescue clears the account queue"
+    }
+   ],
+   "title": "Priority inversion and series rescue"
+  },
+  {
+   "id": "S-06",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the account has 2 queued transactions; the new transaction is a blocker (SetRegularKey)"
+      },
+      {
+       "round": 1,
+       "text": "the blocker cannot join an account queue that already holds transactions"
+      },
+      {
+       "round": 1,
+       "text": "blocker with 2 queued transactions for the account: telCAN_NOT_QUEUE_BLOCKS"
+      }
+     ],
+     "fee_level": 512,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 10,
+     "outcome": "evicted",
+     "params": {
+      "account_queued": 2,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 512,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": true,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 10,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 100,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 100,
+     "reason": "blocker_with_queued_transactions",
+     "required_level": 256,
+     "rounds": 1,
+     "target": 32,
+     "title": "SetRegularKey while the account has queued transactions"
+    }
+   ],
+   "title": "Blocker with queued transactions"
+  },
+  {
+   "id": "S-07",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "a transaction at fee level 512 is queued for the same sequence; the replacement pays 614"
+      },
+      {
+       "round": 1,
+       "text": "the replacement must pay strictly more than 512 + 25% = 640"
+      },
+      {
+       "round": 1,
+       "text": "replacement fee level 614 is not above the required 640 (old 512 + 25%): telCAN_NOT_QUEUE_FEE"
+      }
+     ],
+     "fee_level": 614,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 10,
+     "outcome": "evicted",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 614,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 10,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 100,
+      "remote_factor": 256,
+      "replacement_old_level": 512,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 100,
+     "reason": "replacement_below_25pct_premium",
+     "required_level": 256,
+     "rounds": 1,
+     "target": 32,
+     "title": "Replacement at 1.2x the old fee level"
+    }
+   ],
+   "title": "Replacement below the premium"
+  },
+  {
+   "id": "S-08",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the transaction's LastLedgerSequence is less than 2 ledgers past the open ledger"
+      },
+      {
+       "round": 1,
+       "text": "the transaction cannot be held: it would expire before it has a realistic chance to apply"
+      },
+      {
+       "round": 1,
+       "text": "LastLedgerSequence is inside the 2-ledger buffer: telCAN_NOT_QUEUE"
+      }
+     ],
+     "fee_level": 512,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 10,
+     "outcome": "evicted",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 512,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": false,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 10,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 100,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 100,
+     "reason": "last_ledger_sequence_inside_buffer",
+     "required_level": 256,
+     "rounds": 1,
+     "target": 32,
+     "title": "Transaction inside the last-ledger buffer"
+    },
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the queued transaction has used all 10 retries without applying"
+      },
+      {
+       "round": 1,
+       "text": "the transaction is dropped from the queue"
+      },
+      {
+       "round": 10,
+       "text": "10 retries used up without applying: dropped from the queue"
+      }
+     ],
+     "fee_level": 512,
+     "label": "B",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 10,
+     "outcome": "stalled",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 512,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 10,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 100,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 0,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 100,
+     "reason": "retries_exhausted",
+     "required_level": 256,
+     "rounds": 10,
+     "target": 32,
+     "title": "Retries exhausted in the queue"
+    }
+   ],
+   "title": "Expiry and retries"
+  },
+  {
+   "id": "S-09",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "local load factor is 768, remote is 256; the submitter is privileged (tapUNLIMITED)"
+      },
+      {
+       "round": 1,
+       "text": "the privileged submitter pays the remote factor 256, so 10 drops meets the load fee"
+      },
+      {
+       "round": 1,
+       "text": "fee level 256 is at or above the required level 256: applies to the open ledger"
+      }
+     ],
+     "fee_level": 256,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 10,
+     "outcome": "priced",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": 10,
+      "fee_level": 256,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 768,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 10,
+      "privileged": true,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "at_or_above_required_open_ledger_level",
+     "required_level": 256,
+     "rounds": 1,
+     "target": 32,
+     "title": "Privileged submitter while local load is 3x remote"
+    }
+   ],
+   "title": "Privileged load fee under 4x"
+  },
+  {
+   "id": "S-10",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "local load factor is 1,280, remote is 256; the submitter is privileged; the open ledger holds 40 transactions against a target of 32"
+      },
+      {
+       "round": 1,
+       "text": "the privileged cap no longer applies at 5x remote, so the load fee is 50 drops; 60 drops clears it, but fee level 1,536 is below the required 200,000"
+      },
+      {
+       "round": 1,
+       "text": "fee level 1536 is below the required level 200000: held in the queue for a later ledger"
+      }
+     ],
+     "fee_level": 1536,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "queued",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": 60,
+      "fee_level": 256,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 1280,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": true,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "below_open_ledger_level_queued",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "Privileged submitter while local load is 5x remote"
+    }
+   ],
+   "title": "Privileged load fee beyond 4x"
+  },
+  {
+   "id": "S-11",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the queue is full; the lowest queued fee level is 400, so the minimum processing level is 401; the transaction carries 3 signatures and pays 60 drops"
+      },
+      {
+       "round": 1,
+       "text": "its base fee is 40 drops, so its fee level is 384, below the minimum processing level 401"
+      },
+      {
+       "round": 1,
+       "text": "queue is full and fee level 384 does not beat the lowest-fee account average 400: telCAN_NOT_QUEUE_FULL"
+      }
+     ],
+     "fee_level": 384,
+     "label": "A",
+     "min_processing_level": 401,
+     "multiplier": 128000,
+     "open_count": 40,
+     "outcome": "evicted",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": 60,
+      "fee_level": 256,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": 400,
+      "lowest_queued_level": 400,
+      "multiplier": 128000,
+      "open_count": 40,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 2000,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 3,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": true,
+     "queue_max": 2000,
+     "queue_size": 2000,
+     "reason": "below_lowest_account_average_when_full",
+     "required_level": 200000,
+     "rounds": 1,
+     "target": 32,
+     "title": "Three-signature transaction paying 60 drops"
+    }
+   ],
+   "title": "Multi-signed pricing at a full queue"
+  },
+  {
+   "id": "S-12",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "consensus was slow, so the expected ledger size halves from 500 to 250; the open ledger holds 300 transactions"
+      },
+      {
+       "round": 1,
+       "text": "before the cut the required level was 46,080; after the cut it is 184,320, above the paid 150,000"
+      },
+      {
+       "round": 1,
+       "text": "fee level 150000 is below the required level 184320: held in the queue for a later ledger"
+      }
+     ],
+     "fee_level": 150000,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 300,
+     "outcome": "queued",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": 500,
+      "fee_drops": null,
+      "fee_level": 150000,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 300,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 500,
+      "time_leap": true
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "below_open_ledger_level_queued",
+     "required_level": 184320,
+     "rounds": 1,
+     "target": 250,
+     "title": "Same fee before and after a slow ledger"
+    }
+   ],
+   "title": "Slow consensus halves the target"
+  },
+  {
+   "id": "S-13",
+   "runs": [
+    {
+     "events": [
+      {
+       "round": 0,
+       "text": "the last closed ledger was empty, so the multiplier sits at its floor of 128,000; the open ledger holds 33 transactions against a target of 32"
+      },
+      {
+       "round": 1,
+       "text": "the required level is 136,125 and the transaction pays 140,000"
+      },
+      {
+       "round": 1,
+       "text": "fee level 140000 is at or above the required level 136125: applies to the open ledger"
+      }
+     ],
+     "fee_level": 140000,
+     "label": "A",
+     "min_processing_level": 256,
+     "multiplier": 128000,
+     "open_count": 33,
+     "outcome": "priced",
+     "params": {
+      "account_queued": 0,
+      "blocker_replaces_lone": false,
+      "expected_before": null,
+      "fee_drops": null,
+      "fee_level": 140000,
+      "gap_filling": false,
+      "has_last_valid": true,
+      "is_blocker": false,
+      "last_valid_ok": true,
+      "ledgers_waited": 1,
+      "local_factor": 256,
+      "lowest_account_avg": null,
+      "lowest_queued_level": null,
+      "multiplier": 128000,
+      "open_count": 33,
+      "privileged": false,
+      "queue_max": 2000,
+      "queue_size": 0,
+      "remote_factor": 256,
+      "replacement_old_level": null,
+      "retries_left": 10,
+      "seq_ok": true,
+      "series_required": null,
+      "series_total": null,
+      "signers": 0,
+      "target": 32,
+      "time_leap": false
+     },
+     "queue_full": false,
+     "queue_max": 2000,
+     "queue_size": 0,
+     "reason": "at_or_above_required_open_ledger_level",
+     "required_level": 136125,
+     "rounds": 1,
+     "target": 32,
+     "title": "First escalated transaction on a cold ledger"
+    }
+   ],
+   "title": "Cold-start median floor"
+  }
+ ],
+ "threshold_table": [
+  {
+   "multiple_of_median": 0.002,
+   "multiplier": 128000,
+   "open_count": 32,
+   "required_drops_at_10_drop_base": 10,
+   "required_level": 256,
+   "target": 32
+  },
+  {
+   "multiple_of_median": 1.0634765625,
+   "multiplier": 128000,
+   "open_count": 33,
+   "required_drops_at_10_drop_base": 5317,
+   "required_level": 136125,
+   "target": 32
+  },
+  {
+   "multiple_of_median": 1.5625,
+   "multiplier": 128000,
+   "open_count": 40,
+   "required_drops_at_10_drop_base": 7812,
+   "required_level": 200000,
+   "target": 32
+  },
+  {
+   "multiple_of_median": 0.0009090909090909091,
+   "multiplier": 281600,
+   "open_count": 256,
+   "required_drops_at_10_drop_base": 10,
+   "required_level": 256,
+   "target": 256
+  },
+  {
+   "multiple_of_median": 1.3732883522727273,
+   "multiplier": 281600,
+   "open_count": 300,
+   "required_drops_at_10_drop_base": 15106,
+   "required_level": 386718,
+   "target": 256
+  },
+  {
+   "multiple_of_median": 4.0,
+   "multiplier": 128000,
+   "open_count": 512,
+   "required_drops_at_10_drop_base": 20000,
+   "required_level": 512000,
+   "target": 256
+  },
+  {
+   "multiple_of_median": 0.002,
+   "multiplier": 128000,
+   "open_count": 1000,
+   "required_drops_at_10_drop_base": 10,
+   "required_level": 256,
+   "target": 1000
+  }
+ ],
+ "totals": {
+  "evicted": 6,
+  "priced": 5,
+  "queued": 5,
+  "runs": 18,
+  "scenarios": 13,
+  "stalled": 2
+ }
+}
