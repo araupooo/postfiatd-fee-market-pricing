@@ -1,0 +1,528 @@
+{
+ "pack": "Fee-Market and Transaction-Pricing in postfiatd",
+ "pinned_commit": "0085a1ff885d6a446369cf73a4430f75af22be55",
+ "rules": [
+  {
+   "excerpt": "E01",
+   "id": "R-01",
+   "source": {
+    "anchor": "grow exponentially",
+    "end_line": 64,
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 42
+   },
+   "status": "VERIFIED",
+   "title": "The base fee level is 256 for a single-signed reference transaction"
+  },
+  {
+   "excerpt": "E09",
+   "id": "R-02",
+   "source": {
+    "anchor": "mulDiv(effectiveFeePaid, TxQ::baseLevel, baseFee)",
+    "end_line": 66,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 39
+   },
+   "status": "VERIFIED",
+   "title": "Fee level is fee paid times 256 divided by the base fee"
+  },
+  {
+   "excerpt": "E09",
+   "id": "R-03",
+   "source": {
+    "anchor": "mulDiv(effectiveFeePaid, TxQ::baseLevel, baseFee)",
+    "end_line": 66,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 39
+   },
+   "status": "VERIFIED",
+   "title": "A zero base fee is replaced by a non-zero substitute so the fee level stays non-zero; a non-positive effective fee pays fee level 0"
+  },
+  {
+   "excerpt": "E38",
+   "id": "R-04",
+   "source": {
+    "anchor": "signerCount * baseFee",
+    "end_line": 347,
+    "file": "src/xrpld/app/tx/detail/Transactor.cpp",
+    "start_line": 331
+   },
+   "status": "VERIFIED",
+   "title": "A multi-signed transaction's base fee is the base fee plus one base fee per signer"
+  },
+  {
+   "excerpt": "E09",
+   "id": "R-05",
+   "source": {
+    "anchor": "mulDiv(effectiveFeePaid, TxQ::baseLevel, baseFee)",
+    "end_line": 66,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 39
+   },
+   "status": "VERIFIED",
+   "title": "Fee level, not drops, decides queue order: a multi-signed transaction paying more drops can rank below a cheaper single-signed one"
+  },
+  {
+   "excerpt": "E10",
+   "id": "R-06",
+   "source": {
+    "anchor": "escalationMultiplier_ =",
+    "end_line": 170,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 84
+   },
+   "status": "VERIFIED",
+   "title": "The escalation multiplier is the median fee level of the last closed ledger, floored at the minimum escalation multiplier"
+  },
+  {
+   "excerpt": "E02",
+   "id": "R-07",
+   "source": {
+    "anchor": "ledgersInQueue = 20",
+    "end_line": 109,
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 78
+   },
+   "status": "VERIFIED",
+   "title": "The minimum escalation multiplier is the base level times 500, i.e. 128,000"
+  },
+  {
+   "excerpt": "E11",
+   "id": "R-08",
+   "source": {
+    "anchor": "current * current, target * target",
+    "end_line": 195,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 173
+   },
+   "status": "VERIFIED",
+   "title": "Above the target, the required fee level is multiplier times current squared over target squared: quadratic, not exponential"
+  },
+  {
+   "excerpt": "E40",
+   "id": "R-09",
+   "source": {
+    "anchor": "currently 10 drops",
+    "end_line": 68,
+    "file": "src/xrpld/app/misc/FeeEscalation.md",
+    "start_line": 14
+   },
+   "status": "VERIFIED",
+   "title": "The in-tree documentation says the fee level 'increases exponentially', but the code computes a quadratic"
+  },
+  {
+   "excerpt": "E13",
+   "id": "R-10",
+   "source": {
+    "anchor": "escalatedSeriesFeeLevel",
+    "end_line": 275,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 234
+   },
+   "status": "VERIFIED",
+   "title": "A series fee level sums the squares over the series; sums at or above 2^21 transactions are treated as overflow"
+  },
+  {
+   "excerpt": "E10",
+   "id": "R-11",
+   "source": {
+    "anchor": "escalationMultiplier_ =",
+    "end_line": 170,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 84
+   },
+   "status": "VERIFIED",
+   "title": "When healthy, the expected ledger size grows fast (up to the largest recent count plus 20%) and shrinks slowly (90% of the way toward it); slow consensus cuts it by 50% and clears the recent-count buffer"
+  },
+  {
+   "excerpt": "E02",
+   "id": "R-12",
+   "source": {
+    "anchor": "ledgersInQueue = 20",
+    "end_line": 109,
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 78
+   },
+   "status": "VERIFIED",
+   "title": "Ledger-size defaults: minimum 32 transactions per ledger (1,000 standalone), target 256, optional maximum"
+  },
+  {
+   "excerpt": "E10",
+   "id": "R-13",
+   "source": {
+    "anchor": "escalationMultiplier_ =",
+    "end_line": 170,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 84
+   },
+   "status": "VERIFIED",
+   "title": "On a slow-consensus ledger the expected size is clamped between the minimum and the previous expectation reduced by the slow-consensus percentage"
+  },
+  {
+   "excerpt": "E33",
+   "id": "R-14",
+   "source": {
+    "anchor": "lftFeeMax = lftNormalFee * 1000000",
+    "end_line": 148,
+    "file": "src/xrpld/app/misc/LoadFeeTrack.h",
+    "start_line": 141
+   },
+   "status": "VERIFIED",
+   "title": "Load constants: normal load factor 256, raise and lower steps of 1/4, maximum load factor 256,000,000"
+  },
+  {
+   "excerpt": "E34",
+   "id": "R-15",
+   "source": {
+    "anchor": "raiseLocalFee",
+    "end_line": 58,
+    "file": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp",
+    "start_line": 32
+   },
+   "status": "VERIFIED",
+   "title": "The local load fee rises only after two consecutive overload signals, by one quarter each time, capped at the maximum"
+  },
+  {
+   "excerpt": "E35",
+   "id": "R-16",
+   "source": {
+    "anchor": "lowerLocalFee",
+    "end_line": 79,
+    "file": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp",
+    "start_line": 60
+   },
+   "status": "VERIFIED",
+   "title": "Lowering the local load fee resets the overload count, decreases by one quarter, and never goes below the normal factor"
+  },
+  {
+   "excerpt": "E32",
+   "id": "R-17",
+   "source": {
+    "anchor": "getLoadFactor",
+    "end_line": 112,
+    "file": "src/xrpld/app/misc/LoadFeeTrack.h",
+    "start_line": 95
+   },
+   "status": "VERIFIED",
+   "title": "The load factor is the maximum of the local, remote, and cluster factors; the scaling factors pair the local/remote and remote/cluster maxima"
+  },
+  {
+   "excerpt": "E36",
+   "id": "R-18",
+   "source": {
+    "anchor": "scaleFeeLoad",
+    "end_line": 112,
+    "file": "src/xrpld/app/misc/detail/LoadFeeTrack.cpp",
+    "start_line": 84
+   },
+   "status": "VERIFIED",
+   "title": "Load scaling multiplies the fee by the factor over 256; a privileged submitter pays the remote factor while the local factor is below four times remote"
+  },
+  {
+   "excerpt": "E37",
+   "id": "R-19",
+   "source": {
+    "anchor": "isOverloaded()",
+    "end_line": 190,
+    "file": "src/xrpld/app/main/LoadManager.cpp",
+    "start_line": 176
+   },
+   "status": "VERIFIED",
+   "title": "The load manager raises the local fee while the job queue is overloaded and lowers it otherwise"
+  },
+  {
+   "excerpt": "E05",
+   "id": "R-20",
+   "source": {
+    "anchor": "feeLevel > rhs.feeLevel",
+    "end_line": 663,
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 631
+   },
+   "status": "VERIFIED",
+   "title": "The queue is ordered by fee level descending; equal fee levels order by transaction ID XOR the parent ledger hash"
+  },
+  {
+   "excerpt": "E24",
+   "id": "R-21",
+   "source": {
+    "anchor": "maxSize_ = std::max",
+    "end_line": 1425,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1366
+   },
+   "status": "VERIFIED",
+   "title": "The maximum queue size is the larger of expected ledgers times ledgers-in-queue and the minimum queue size; it is not updated on slow-consensus ledgers"
+  },
+  {
+   "excerpt": "E28",
+   "id": "R-22",
+   "source": {
+    "anchor": "minProcessingFeeLevel",
+    "end_line": 1799,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1778
+   },
+   "status": "VERIFIED",
+   "title": "The minimum processing fee level is the lowest queued fee level plus one when the queue is full, else the base level"
+  },
+  {
+   "excerpt": "E15",
+   "id": "R-23",
+   "source": {
+    "anchor": "telCAN_NOT_QUEUE",
+    "end_line": 462,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 384
+   },
+   "status": "VERIFIED",
+   "title": "One account may queue at most 10 transactions, except when filling an expiration-based sequence gap"
+  },
+  {
+   "excerpt": "E15",
+   "id": "R-24",
+   "source": {
+    "anchor": "telCAN_NOT_QUEUE",
+    "end_line": 462,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 384
+   },
+   "status": "VERIFIED",
+   "title": "A transaction with a LastLedgerSequence must promise at least 2 ledgers past the open ledger to be queueable"
+  },
+  {
+   "excerpt": "E15",
+   "id": "R-25",
+   "source": {
+    "anchor": "telCAN_NOT_QUEUE",
+    "end_line": 462,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 384
+   },
+   "status": "VERIFIED",
+   "title": "Transactions carrying PreviousTxnID or AccountTxnID, or submitted with tapFAIL_HARD, can never be queued"
+  },
+  {
+   "excerpt": "E19",
+   "id": "R-26",
+   "source": {
+    "anchor": "A blocking transaction is one",
+    "end_line": 729,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 616
+   },
+   "status": "VERIFIED",
+   "title": "Blockers queue alone or by replacing the lone queued transaction; sequence numbers must be next or fill the first gap; ticket transactions need the ticket already in the ledger"
+  },
+  {
+   "excerpt": "E21",
+   "id": "R-27",
+   "source": {
+    "anchor": "requiredRetryLevel",
+    "end_line": 935,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 875
+   },
+   "status": "VERIFIED",
+   "title": "A replacement must pay strictly more than the old fee level plus 25%"
+  },
+  {
+   "excerpt": "E22",
+   "id": "R-28",
+   "source": {
+    "anchor": "telCAN_NOT_QUEUE_BALANCE",
+    "end_line": 1130,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1040
+   },
+   "status": "VERIFIED",
+   "title": "Queued fees in flight are bounded by the account balance and, when the reserve exceeds ten times the base fee, by the reserve"
+  },
+  {
+   "excerpt": "E25",
+   "id": "R-29",
+   "source": {
+    "anchor": "retriesRemaining <= 0",
+    "end_line": 1560,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1435
+   },
+   "status": "VERIFIED",
+   "title": "The queue drains highest fee level first and stops at the first transaction below the required level"
+  },
+  {
+   "excerpt": "E25",
+   "id": "R-30",
+   "source": {
+    "anchor": "retriesRemaining <= 0",
+    "end_line": 1560,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1435
+   },
+   "status": "VERIFIED",
+   "title": "A sequence-based transaction that is not the first for its account is skipped until its predecessor applies"
+  },
+  {
+   "excerpt": "E07",
+   "id": "R-31",
+   "source": {
+    "anchor": "retriesAllowed = 10",
+    "end_line": 590,
+    "file": "src/xrpld/app/misc/TxQ.h",
+    "start_line": 575
+   },
+   "status": "VERIFIED",
+   "title": "A queued transaction gets 10 retry attempts; an account whose transaction retried out gives its other transactions at most 2 attempts, and a failed or expired transaction marks the account for dropping when the queue is 95% full"
+  },
+  {
+   "excerpt": "E24",
+   "id": "R-32",
+   "source": {
+    "anchor": "maxSize_ = std::max",
+    "end_line": 1425,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1366
+   },
+   "status": "VERIFIED",
+   "title": "Transactions whose LastLedgerSequence has passed are removed when a ledger closes, and the account is marked with the drop penalty"
+  },
+  {
+   "excerpt": "E23",
+   "id": "R-33",
+   "source": {
+    "anchor": "telCAN_NOT_QUEUE_FULL",
+    "end_line": 1320,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1243
+   },
+   "status": "VERIFIED",
+   "title": "When the queue is full, a newcomer is admitted only if its fee level beats the lowest-fee account's average fee level; that account's cheapest transaction is dropped"
+  },
+  {
+   "excerpt": "E17",
+   "id": "R-34",
+   "source": {
+    "anchor": "requiredTotalFeeLevel",
+    "end_line": 560,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 518
+   },
+   "status": "VERIFIED",
+   "title": "A new transaction can rescue a stuck account queue if the summed fee levels of the queued series plus itself cover the escalated series level; the queued transactions are then applied first"
+  },
+  {
+   "excerpt": "E27",
+   "id": "R-35",
+   "source": {
+    "anchor": "feeLevelPaid >= requiredFeeLevel",
+    "end_line": 1744,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1669
+   },
+   "status": "VERIFIED",
+   "title": "Direct apply needs the transaction sequence to match the account sequence (or a ticket) and a fee level at or above the required level; applying removes any queued transaction it replaces"
+  },
+  {
+   "excerpt": "E28",
+   "id": "R-36",
+   "source": {
+    "anchor": "minProcessingFeeLevel",
+    "end_line": 1799,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1778
+   },
+   "status": "VERIFIED",
+   "title": "The metrics report queue size, queue maximum, open-ledger size, expected size, reference level, minimum processing level, median level, and open-ledger level"
+  },
+  {
+   "excerpt": "E30",
+   "id": "R-37",
+   "source": {
+    "anchor": "open_ledger_level",
+    "end_line": 1910,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1860
+   },
+   "status": "VERIFIED",
+   "title": "The fee RPC returns levels and drops; the open-ledger fee is rounded up by one drop when the drop value would fall below the required level"
+  },
+  {
+   "excerpt": "E31",
+   "id": "R-38",
+   "source": {
+    "anchor": "setup_TxQ",
+    "end_line": 1982,
+    "file": "src/xrpld/app/misc/detail/TxQ.cpp",
+    "start_line": 1915
+   },
+   "status": "VERIFIED",
+   "title": "Every queue setting is configurable in the transaction_queue section; the increase percentage is clamped to 0-1000 and the decrease percentage to 0-100"
+  },
+  {
+   "excerpt": null,
+   "external": {
+    "quote": "The transaction cost is not paid to any party: the XRP is irrevocably destroyed.",
+    "url": "https://xrpl.org/docs/references/protocol/transactions/transaction-cost"
+   },
+   "id": "R-39",
+   "source": null,
+   "status": "SPECIFIED",
+   "title": "Transaction fees are destroyed, not paid to anyone"
+  },
+  {
+   "excerpt": null,
+   "external": {
+    "quote": "If you submit a transaction through an admin connection, the server applies and relays the transaction as long as the transaction meets the un-scaled minimum transaction cost.",
+    "url": "https://xrpl.org/docs/references/protocol/transactions/transaction-cost"
+   },
+   "id": "R-40",
+   "source": null,
+   "status": "SPECIFIED",
+   "title": "A transaction submitted through an admin connection bypasses load scaling and needs only the un-scaled minimum fee"
+  },
+  {
+   "excerpt": null,
+   "external": {
+    "quote": "A transaction is very unlikely to survive the consensus process unless its Fee value meets the requirements of a majority of servers.",
+    "url": "https://xrpl.org/docs/references/protocol/transactions/transaction-cost"
+   },
+   "id": "R-41",
+   "source": null,
+   "status": "SPECIFIED",
+   "title": "A transaction is very unlikely to survive consensus unless its fee meets the requirements of a majority of servers"
+  },
+  {
+   "excerpt": null,
+   "external": {
+    "quote": "When the FeeEscalation amendment is enabled, there are two thresholds for the transaction cost",
+    "url": "https://xrpl.org/docs/references/protocol/transactions/transaction-cost"
+   },
+   "id": "R-42",
+   "source": null,
+   "status": "SPECIFIED",
+   "title": "With fee escalation enabled there are two thresholds: a load-based cost below which the server ignores the transaction, and an open-ledger cost below which it queues the transaction"
+  },
+  {
+   "excerpt": null,
+   "id": "R-43",
+   "source": null,
+   "status": "MODELLED",
+   "title": "Fee-spike threshold: the minimum fee level to enter the open ledger at a given load equals the threshold table (quadratic in the open-ledger count)"
+  },
+  {
+   "excerpt": null,
+   "id": "R-44",
+   "source": null,
+   "status": "MODELLED",
+   "title": "Queue-saturation eviction threshold: a newcomer must beat the lowest-fee account's average fee level to displace its cheapest transaction"
+  },
+  {
+   "excerpt": null,
+   "id": "R-45",
+   "source": null,
+   "status": "UNTESTABLE",
+   "title": "Live network fee behaviour under real load: actual fee levels paid, queue occupancy, and validator divergence in production"
+  }
+ ],
+ "schema_version": 1
+}
